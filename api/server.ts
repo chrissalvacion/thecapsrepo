@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
@@ -811,6 +810,7 @@ async function startServer() {
 
   // Vite middleware for development
   if (isDevServer) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
