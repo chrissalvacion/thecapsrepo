@@ -47,7 +47,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={<Login onLogin={(u: any) => setUser(u)} />} />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/overview" replace /> : <Login onLogin={(u: any) => setUser(u)} />}
+        />
         <Route path="/student" element={<StudentView />} />
         
         {/* Admin Routes */}

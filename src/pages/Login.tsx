@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
@@ -12,7 +12,6 @@ export default function Login({ onLogin }: { onLogin: (user: any) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +21,6 @@ export default function Login({ onLogin }: { onLogin: (user: any) => void }) {
       localStorage.setItem('auth_token', data.token);
       onLogin(data.user);
       toast.success("Welcome back, Instructor!");
-      navigate('/teams');
     } catch (error: any) {
       toast.error(error.message || "Invalid credentials");
     } finally {
