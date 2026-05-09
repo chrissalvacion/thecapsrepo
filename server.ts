@@ -209,7 +209,10 @@ async function initializeDatabase() {
   } catch (error) {
     logSupabaseConnectionHint(error, buildConnectionString());
     console.error("Database initialization error:", error);
-    process.exit(1);
+    if (isDirectExecution) {
+      process.exit(1);
+    }
+    throw error;
   }
 }
 
