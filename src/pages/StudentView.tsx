@@ -121,12 +121,12 @@ export default function StudentView() {
               ) : (
                 record.defenses.map((d: Defense) => (
                   <Card key={d.id} className="p-6 space-y-4">
-                    <h3 className="text-xl font-bold tracking-tight">Defense Records</h3>
+                    <h3 className="text-xl font-bold tracking-tight">{d.defense_type} Records</h3>
                     <div className="flex justify-between items-start gap-3 flex-wrap">
                       <div>
                         <Badge variant="outline" className="mb-2 uppercase tracking-tighter text-[10px]">{d.defense_type}</Badge>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(d.defense_date), 'PPPP')} at {d.defense_time}
+                          {format(new Date(d.defense_date), 'PPPP')} at {format(new Date(`2000-01-01 ${d.defense_time}`), 'h:mm a')}
                         </p>
                       </div>
                       <Badge variant={d.status === 'Completed' ? 'default' : 'outline'}>{d.status}</Badge>
@@ -142,6 +142,16 @@ export default function StudentView() {
                         ))}
                       </div>
                     </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Recommendation</p>
+                      <p className="text-sm font-medium capitalize">
+                        {d.recommendations || 'Pending'}
+                      </p>
+                      {d.suggestions && (
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-2">{d.suggestions}</p>
+                      )}
+                    </div>
                   </Card>
                 ))
               )}
@@ -151,7 +161,8 @@ export default function StudentView() {
       </main>
 
       <footer className="py-12 border-t text-center text-sm text-muted-foreground">
-        <Link to="/login" className="hover:text-primary transition-colors">Admin Portal Login</Link>
+          <p className="mb-2">This is a student-facing view of the defense repository. For any questions or issues, please contact your instructor.</p>
+          <p className="text-xs">TheCapsRepo &copy; {new Date().getFullYear()} | Developed by @chrissalvacion</p>
       </footer>
     </div>
   );

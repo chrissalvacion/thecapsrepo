@@ -58,6 +58,20 @@ function getHostFromConnectionString(connectionString?: string) {
   }
 }
 
+function normalizeConnectionString(connectionString: string) {
+  try {
+    const parsed = new URL(connectionString);
+    parsed.searchParams.delete("sslmode");
+    parsed.searchParams.delete("sslrootcert");
+    parsed.searchParams.delete("sslcert");
+    parsed.searchParams.delete("sslkey");
+    parsed.searchParams.delete("uselibpqcompat");
+    return parsed.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function logSupabaseConnectionHint(error: unknown, connectionString?: string) {
   const e = error as { code?: string; hostname?: string };
   const hostFromError = e?.hostname;
@@ -76,7 +90,8 @@ function logSupabaseConnectionHint(error: unknown, connectionString?: string) {
 }
 
 function createCompatPool(): CompatPool {
-  const connectionString = buildConnectionString();
+  const rawConnectionString = buildConnectionString();
+  const connectionString = rawConnectionString ? normalizeConnectionString(rawConnectionString) : rawConnectionString;
   if (!connectionString) {
     return {
       getConnection: async () => {
