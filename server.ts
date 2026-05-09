@@ -241,8 +241,10 @@ async function backfillMissingAccessCodes() {
 
 
 async function startServer() {
-  await initializeDatabase();
-  await backfillMissingAccessCodes();
+  if (isDirectExecution) {
+    await initializeDatabase();
+    await backfillMissingAccessCodes();
+  }
 
   const app = express();
   app.use(express.json());
