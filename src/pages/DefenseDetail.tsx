@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import { Defense } from '../types';
+import { Defense, Team } from '../types';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -40,6 +40,7 @@ export default function DefenseDetail() {
   const sessionsStorageKey = `defense_sessions_${defenseId}`;
   const recommendationsStorageKey = `defense_recommendations_${defenseId}`;
   const [defense, setDefense] = useState<Defense | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Recording state
@@ -75,10 +76,14 @@ export default function DefenseDetail() {
 
   useEffect(() => {
     if (!defenseId) return;
-    api.defenses.list(teamId)
-      .then((list: Defense[]) => {
+    Promise.all([
+      api.defenses.list(teamId),
+      teamId ? api.teams.get(teamId) : Promise.resolve(null),
+    ])
+      .then(([list, teamData]: [Defense[], Team | null]) => {
         const found = list.find(d => d.id === defenseId);
         setDefense(found || null);
+        setTeam(teamData);
         if (found?.panelists?.length) {
           setSelectedPanelist(found.panelists[0]);
         }
@@ -365,6 +370,7 @@ export default function DefenseDetail() {
       {/* Defense Info */}
       <div className="border-b pb-6">
         <h1 className="text-3xl font-extrabold tracking-tight">{defense.defense_type}</h1>
+        <p className="text-sm font-medium mt-2">{team?.team_name || 'Unknown Team'}</p>
         <p className="text-muted-foreground text-sm mt-1">
           {format(new Date(defense.defense_date), 'PPP')} at {defense.defense_time}
         </p>

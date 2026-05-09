@@ -30,7 +30,8 @@ export default function Defenses() {
       
       const data = dData.map((d: Defense) => ({
         ...d,
-        team: teamMap.get(d.teamId) ?? teamMap.get((d as any).team_id)
+        teamId: d.teamId ?? (d as any).team_id ?? (d as any).teamid,
+        team: teamMap.get(d.teamId ?? (d as any).team_id ?? (d as any).teamid)
       }));
       setDefenses(data);
     } catch (err) {
