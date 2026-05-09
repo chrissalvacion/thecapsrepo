@@ -37,6 +37,10 @@ function buildConnectionString() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
   if (process.env.SUPABASE_DATABASE_URL) return process.env.SUPABASE_DATABASE_URL;
 
+  if (process.env.VERCEL === "1" || (!isDirectExecution && process.env.NODE_ENV === "production")) {
+    return "";
+  }
+
   const host = process.env.PGHOST || process.env.DB_HOST || "localhost";
   const port = process.env.PGPORT || process.env.DB_PORT || "5432";
   const user = encodeURIComponent(process.env.PGUSER || process.env.DB_USER || "postgres");
@@ -46,16 +50,17 @@ function buildConnectionString() {
   return `postgresql://${user}:${password}@${host}:${port}/${database}`;
 }
 
-function getHostFromConnectionString(connectionString: string) {
+function getHostFromConnectionString(connectionString?: string) {
   try {
+    if (!connectionString) return undefined;
     return new URL(connectionString).hostname;
   } catch {
     return undefined;
   }
 }
 
-function logSupabaseConnectionHint(error: unknown, connectionString: string) {
-  const e = error as NodeJS.ErrnoException;
+function logSupabaseConnectionHint(error: unknown, connectionString?: string) {
+  const e = error as { code?: string; hostname?: string };
   const hostFromError = e?.hostname;
   const hostFromUrl = getHostFromConnectionString(connectionString);
   const host = hostFromError || hostFromUrl || "";
@@ -73,6 +78,14 @@ function logSupabaseConnectionHint(error: unknown, connectionString: string) {
 
 function createCompatPool(): CompatPool {
   const connectionString = buildConnectionString();
+  if (!connectionString) {
+    return {
+      getConnection: async () => {
+        throw new Error("Missing SUPABASE_DB_POOLER_URL or DATABASE_URL in Vercel environment variables.");
+      },
+    };
+  }
+
   const shouldUseSsl = process.env.NODE_ENV === "production" || process.env.PGSSLMODE === "require";
 
   const pgPool = new PgPool({
