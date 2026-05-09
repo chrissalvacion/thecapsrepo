@@ -11,6 +11,43 @@ function EmptyState({ message }: { message: string }) {
   return <p className="text-sm text-muted-foreground">{message}</p>;
 }
 
+function normalizeTeam(team: any): Team {
+  return {
+    ...team,
+    access_code: team.access_code ?? team.accessCode,
+    createdAt: team.createdAt ?? team.createdat,
+  };
+}
+
+function normalizeProject(project: any): Project {
+  return {
+    ...project,
+    teamId: project.teamId ?? project.team_id ?? project.teamid,
+    createdAt: project.createdAt ?? project.createdat,
+  };
+}
+
+function normalizeDefense(defense: any): Defense {
+  return {
+    ...defense,
+    teamId: defense.teamId ?? defense.team_id ?? defense.teamid,
+    defense_time: defense.defense_time ?? defense.defenseTime,
+    recommendations: defense.recommendations ?? '',
+    suggestions: defense.suggestions ?? '',
+    panelists: Array.isArray(defense.panelists) ? defense.panelists : [],
+    createdAt: defense.createdAt ?? defense.createdat,
+  };
+}
+
+function normalizeConsultation(consultation: any): Consultation {
+  return {
+    ...consultation,
+    teamId: consultation.teamId ?? consultation.team_id ?? consultation.teamid,
+    recommendations: consultation.recommendations ?? '',
+    createdAt: consultation.createdAt ?? consultation.createdat,
+  };
+}
+
 export default function Overview() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -27,10 +64,10 @@ export default function Overview() {
           api.defenses.list(),
           api.consultations.list(),
         ]);
-        setTeams(teamsData);
-        setProjects(projectsData);
-        setDefenses(defensesData);
-        setConsultations(consultationsData);
+        setTeams(teamsData.map(normalizeTeam));
+        setProjects(projectsData.map(normalizeProject));
+        setDefenses(defensesData.map(normalizeDefense));
+        setConsultations(consultationsData.map(normalizeConsultation));
       } catch {
         toast.error('Failed to load overview data');
       } finally {

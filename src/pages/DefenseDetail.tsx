@@ -76,14 +76,19 @@ export default function DefenseDetail() {
 
   useEffect(() => {
     if (!defenseId) return;
-    Promise.all([
-      api.defenses.list(teamId),
-      teamId ? api.teams.get(teamId) : Promise.resolve(null),
-    ])
-      .then(([list, teamData]: [Defense[], Team | null]) => {
+    api.defenses.list(teamId)
+      .then(async (list: Defense[]) => {
         const found = list.find(d => d.id === defenseId);
         setDefense(found || null);
-        setTeam(teamData);
+
+        const resolvedTeamId = teamId ?? found?.teamId ?? (found as any)?.team_id ?? (found as any)?.teamid;
+        if (resolvedTeamId) {
+          const teamData = await api.teams.get(resolvedTeamId);
+          setTeam(teamData);
+        } else {
+          setTeam(null);
+        }
+
         if (found?.panelists?.length) {
           setSelectedPanelist(found.panelists[0]);
         }
