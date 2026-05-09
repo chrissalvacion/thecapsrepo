@@ -14,10 +14,18 @@ async function request(path: string, options: RequestInit = {}) {
     headers: { ...getHeaders(), ...options.headers },
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(err.error || 'Request failed');
+    const text = await res.text().catch(() => '');
+    let message = `Request failed (${res.status})`;
+    try {
+      const err = JSON.parse(text);
+      message = err.error || err.message || message;
+    } catch {
+      if (text) message = text.replace(/<[^>]*>/g, '').trim().slice(0, 200) || message;
+    }
+    throw new Error(message);
   }
-  return res.json();
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
 
 export const api = {
