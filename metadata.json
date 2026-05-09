@@ -1,0 +1,6 @@
+{
+  "name": "TheCapsRepo",
+  "description": "Capstone repository system for instructors to manage teams, projects, defenses, and consultations, with automated Google Calendar scheduling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

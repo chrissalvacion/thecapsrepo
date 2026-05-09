@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      // For this system, we assume the instructor is the one logged in.
+      // We can restrict to a specific email list if needed.
+      return isEmailVerified() && (
+        request.auth.token.email == 'christianraelopezs@gmail.com' ||
+        exists(/databases/$(database)/documents/adminConfig/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Teams
+    match /teams/{teamId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && 
+        incoming().team_name is string && incoming().team_name.size() < 200 &&
+        incoming().proponents is list &&
+        incoming().adviser is string;
+      allow update: if isAdmin() && 
+        incoming().team_name is string &&
+        incoming().proponents is list;
+      allow delete: if isAdmin();
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && 
+        isValidId(incoming().teamId) &&
+        incoming().project_title is string;
+      allow update: if isAdmin() && 
+        incoming().project_title is string &&
+        incoming().teamId == existing().teamId;
+      allow delete: if isAdmin();
+    }
+
+    // Defenses
+    match /defenses/{defenseId} {
+      // Students can read defense details
+      allow read: if true; 
+      allow create: if isAdmin() &&
+        isValidId(incoming().teamId) &&
+        incoming().defense_type is string &&
+        incoming().defense_date is string &&
+        incoming().defense_time is string &&
+        incoming().panelists is list;
+      allow update: if isAdmin() &&
+        incoming().teamId == existing().teamId;
+      allow delete: if isAdmin();
+    }
+
+    // Consultations
+    match /consultations/{consultationId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() &&
+        isValidId(incoming().teamId) &&
+        incoming().issues is string &&
+        incoming().recommendations is string;
+      allow update: if isAdmin() &&
+        incoming().teamId == existing().teamId;
+      allow delete: if isAdmin();
+    }
+
+    // Admin Config
+    match /adminConfig/{adminId} {
+      allow read, write: if isSignedIn() && request.auth.uid == adminId;
+    }
+  }
+}
