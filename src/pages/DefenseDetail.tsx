@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import { Defense, Team } from '../types';
+import { Defense, Team, Project } from '../types';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -41,6 +41,7 @@ export default function DefenseDetail() {
   const recommendationsStorageKey = `defense_recommendations_${defenseId}`;
   const [defense, setDefense] = useState<Defense | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Recording state
@@ -85,6 +86,10 @@ export default function DefenseDetail() {
         if (resolvedTeamId) {
           const teamData = await api.teams.get(resolvedTeamId);
           setTeam(teamData);
+          
+          // Fetch projects for this team
+          const projectsData = await api.projects.list(resolvedTeamId);
+          setProjects(projectsData);
         } else {
           setTeam(null);
         }
@@ -371,6 +376,7 @@ Date: ${format(new Date(defense.defense_date), 'PPP')}
 Time: ${defense.defense_time}
 
 Team Name: ${team.team_name}
+Project Title: ${projects.length > 0 ? projects[0].project_title : 'N/A'}
 
 Proponents:
 ${team.proponents.map((p) => `  • ${p}`).join('\n')}
@@ -403,6 +409,9 @@ ${defense.panelists.map((p) => `  • ${p}`).join('\n')}`;
       <div className="border-b pb-6">
         <h1 className="text-3xl font-extrabold tracking-tight">{defense.defense_type}</h1>
         <p className="text-sm font-medium mt-2">{team?.team_name || 'Unknown Team'}</p>
+        {projects.length > 0 && (
+          <p className="text-sm text-muted-foreground mt-1">{projects[0].project_title}</p>
+        )}
         <p className="text-muted-foreground text-sm mt-1">
           {format(new Date(defense.defense_date), 'PPP')} at {defense.defense_time}
         </p>
