@@ -148,9 +148,10 @@ export default function StudentView() {
                       <p className="text-sm font-medium capitalize">
                         {d.recommendations || 'Pending'}
                       </p>
-                      {d.suggestions && (
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-2">{d.suggestions}</p>
-                      )}
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mt-3 mb-1">Suggestions</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {d.suggestions?.trim() || 'No suggestions provided yet.'}
+                      </p>
                     </div>
                   </Card>
                 ))

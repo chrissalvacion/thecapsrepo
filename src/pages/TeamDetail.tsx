@@ -36,6 +36,7 @@ export default function TeamDetail() {
   const [showDefenseModal, setShowDefenseModal] = useState(false);
   const [showEditTeamModal, setShowEditTeamModal] = useState(false);
   const [editProponents, setEditProponents] = useState<string[]>([]);
+  const [editProponentInput, setEditProponentInput] = useState('');
 
   const fetchData = async () => {
     if (!teamId) return;
@@ -152,6 +153,14 @@ export default function TeamDetail() {
     } catch { toast.error('Failed to update team'); }
   };
 
+  const addEditProponent = () => {
+    const val = editProponentInput.trim();
+    if (val && !editProponents.includes(val)) {
+      setEditProponents([...editProponents, val]);
+      setEditProponentInput('');
+    }
+  };
+
   const handleDeleteTeam = async () => {
     if (!teamId) return;
     const confirmed = window.confirm('Delete this team? All associated projects, defenses, and consultations will also be deleted. This cannot be undone.');
@@ -204,38 +213,33 @@ export default function TeamDetail() {
                 {editProponents.map((name, i) => (
                   <Badge key={i} variant="secondary" className="pl-2 gap-1 py-1">
                     {name}
-                    <button type="button" onClick={() => setEditProponents(editProponents.filter((_, idx) => idx !== i))} className="hover:text-destructive">×</button>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => setEditProponents(editProponents.filter((_, idx) => idx !== i))} className="h-5 w-5 hover:text-destructive">×</Button>
                   </Badge>
                 ))}
               </div>
               <div className="flex gap-2">
                 <Input
-                  id="new-proponent-input"
                   placeholder="Add proponent name and press Enter"
-                  onKeyDown={(e) => {
+                  value={editProponentInput}
+                  onChange={(e) => setEditProponentInput(e.target.value)}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      const val = (e.target as HTMLInputElement).value.trim();
-                      if (val && !editProponents.includes(val)) {
-                        setEditProponents([...editProponents, val]);
-                        (e.target as HTMLInputElement).value = '';
-                      }
+                      addEditProponent();
                     }
                   }}
                 />
-                <Button type="button" variant="outline" onClick={() => {
-                  const input = document.getElementById('new-proponent-input') as HTMLInputElement;
-                  const val = input?.value.trim();
-                  if (val && !editProponents.includes(val)) {
-                    setEditProponents([...editProponents, val]);
-                    input.value = '';
-                  }
-                }}>Add</Button>
+                <Button type="button" variant="outline" onClick={addEditProponent}>Add</Button>
               </div>
             </div>
             <div className="space-y-2">
               <Label>Program</Label>
-              <Input name="program" defaultValue={team.program} required />
+              <Input name="program" list="program-options" defaultValue={team.program || 'BS Computer Science'} required />
+              <datalist id="program-options">
+                <option value="BS Computer Science" />
+                <option value="BS Information Systems" />
+                <option value="BS Information Technology" />
+              </datalist>
             </div>
             <div className="space-y-2">
               <Label>Class / Section</Label>
@@ -243,11 +247,11 @@ export default function TeamDetail() {
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input name="email" type="email" defaultValue={team.email} required />
+              <Input name="email" type="email" defaultValue={team.email}/>
             </div>
             <div className="space-y-2">
               <Label>Contact Number</Label>
-              <Input name="contact_num" defaultValue={team.contact_num} required />
+              <Input name="contact_num" defaultValue={team.contact_num}/>
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>Adviser</Label>
@@ -315,7 +319,7 @@ export default function TeamDetail() {
                 </div>
                 <div className="space-y-2 col-span-2">
                   <Label>Description</Label>
-                  <Textarea name="description" />
+                  <Textarea name="description" className="h-32 overflow-y-auto resize-none" />
                 </div>
                 <div className="space-y-2 col-span-2 md:col-span-1">
                   <Label>School Year</Label>
@@ -323,7 +327,7 @@ export default function TeamDetail() {
                 </div>
                 <div className="space-y-2 col-span-2">
                   <Label>Objectives</Label>
-                  <Textarea name="objectives" />
+                  <Textarea name="objectives" className="h-32 overflow-y-auto resize-none" />
                 </div>
                 <div className="col-span-2 flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setShowProjectModal(false)}>Cancel</Button>

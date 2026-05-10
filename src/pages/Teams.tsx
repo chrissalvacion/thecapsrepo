@@ -164,7 +164,21 @@ export default function Teams() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="prog">Program</Label>
-                <Input id="prog" placeholder="e.g. BSIT" value={program} onChange={e => setProgram(e.target.value)} required />
+                <>
+                  <Input
+                    id="prog"
+                    list="program-options"
+                    placeholder="Select or type program"
+                    value={program}
+                    onChange={e => setProgram(e.target.value)}
+                    required
+                  />
+                  <datalist id="program-options">
+                    <option value="BS Computer Science" />
+                    <option value="BS Information Systems" />
+                    <option value="BS Information Technology" />
+                  </datalist>
+                </>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="class">Class Code</Label>
