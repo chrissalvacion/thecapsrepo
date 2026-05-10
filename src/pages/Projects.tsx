@@ -19,14 +19,20 @@ export default function Projects() {
     const fetchProjects = async () => {
       try {
         const pData = await api.projects.list();
-        const teamsData = await api.teams.list();
-        const teamMap = new Map(teamsData.map((t: Team) => [t.id, t]));
         
-        const data = pData.map((p: Project) => ({
-          ...p,
-          team: teamMap.get(p.teamId)
-        }));
-        setProjects(data);
+        // Fetch team data for each project
+        const projectsWithTeams = await Promise.all(
+          pData.map(async (p: Project) => {
+            try {
+              const team = await api.teams.get(p.teamId);
+              return { ...p, team };
+            } catch {
+              return { ...p, team: undefined };
+            }
+          })
+        );
+        
+        setProjects(projectsWithTeams);
       } catch (err) {
         toast.error("Failed to load projects");
       } finally {
