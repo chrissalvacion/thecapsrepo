@@ -90,7 +90,7 @@ export default function Projects() {
                     <TableCell>{p.school_year || 'N/A'}</TableCell>
                     <TableCell><Badge variant="secondary">{p.status}</Badge></TableCell>
                     <TableCell className="text-right">
-                      <Link to={`/teams/${p.teamId}`} className="text-primary hover:underline text-sm inline-flex items-center gap-1">
+                      <Link to={`/teams/${p.team?.id}`} className="text-primary hover:underline text-sm inline-flex items-center gap-1">
                         Go to Team <ExternalLink className="h-3 w-3" />
                       </Link>
                     </TableCell>

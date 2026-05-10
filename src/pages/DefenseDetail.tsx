@@ -8,7 +8,7 @@ import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { ChevronLeft, Mic, MicOff, Trash2 } from 'lucide-react';
+import { ChevronLeft, Mic, MicOff, Trash2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -360,6 +360,33 @@ export default function DefenseDetail() {
     }
   };
 
+  const copyDefenseDetailsToClipboard = () => {
+    if (!defense || !team) return;
+
+    const detailsText = `Defense Details
+================
+
+Defense Type: ${defense.defense_type}
+Date: ${format(new Date(defense.defense_date), 'PPP')}
+Time: ${defense.defense_time}
+
+Team Name: ${team.team_name}
+
+Proponents:
+${team.proponents.map((p) => `  • ${p}`).join('\n')}
+
+Adviser: ${team.adviser}
+
+Panel Members:
+${defense.panelists.map((p) => `  • ${p}`).join('\n')}`;
+
+    navigator.clipboard.writeText(detailsText).then(() => {
+      toast.success('Defense details copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard.');
+    });
+  };
+
   if (loading) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
   if (!defense) return <div className="p-8 text-center">Defense not found.</div>;
 
@@ -380,6 +407,14 @@ export default function DefenseDetail() {
           {format(new Date(defense.defense_date), 'PPP')} at {defense.defense_time}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={copyDefenseDetailsToClipboard}
+            className="gap-2"
+          >
+            <Copy className="h-4 w-4" /> Copy Details
+          </Button>
           <Button
             type="button"
             variant="outline"
